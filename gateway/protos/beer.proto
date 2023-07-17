@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package beer;
+
+service Beer {
+    rpc getAll(Empty) returns (beerList) {}
+    rpc get(beerId) returns (beerResponse) {}
+    rpc getFilter(beerIds) returns (beerList) {}
+}
+
+message Empty {}
+
+message beerList {
+    repeated beerResponse result = 1;
+}
+
+message beerResponse {
+    int32 id = 1;
+    string name = 2;
+    int32 bartender_preparation_time = 3;
+    int32 volume = 4;
+    int32 pour_time = 5;
+}
+
+message beerId {
+    int32 beerId = 1;
+}
+
+message beerIds {
+    repeated int32 beerIds = 1;
+}
