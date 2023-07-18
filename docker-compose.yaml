@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  beer_service:
+    container_name: "beer_service"
+    build:
+      context: ./beer_service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - DB_HOST=foreside_db
+      - DB_PORT=3306
+      - DB_NAME=foreside
+      - DB_USER=root
+      - DB_PASSWORD=123456
+    restart: on-failure
+    depends_on:
+      foreside_db:
+        condition: service_healthy
+
+  gateway:
+    container_name: "gateway"
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - BEER_SERVICE=beer_service
+      - ORDER_SERVICE=order_service
+    depends_on:
+      - beer_service
+      - order_service
+
+  foreside_db:
+    image: mysql:latest
+    restart: always
+    container_name: "foreside_db"
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    healthcheck:
+      test: [ "CMD-SHELL", 'mysqladmin ping --protocol tcp' ]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+
+  order_service:
+    container_name: "order_service"
+    build:
+      context: ./order_service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - BEER_SERVICE=beer_service
+      - BARTENDER_COUNT=4
