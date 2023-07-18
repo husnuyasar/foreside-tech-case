@@ -13,6 +13,10 @@ module.exports = (app) => {
     })
   );
 
+  app.get("/healthz", (req,res)=> {
+    res.end("Service is working!")
+  })
+
   app.get("/beer", (req, res)=> {
     beerClient.getAll({}, (err,response)=> {
       if(err) return res.status(400).send(err);
