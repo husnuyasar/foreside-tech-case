@@ -3,17 +3,9 @@ syntax = "proto3";
 package order;
 
 service Order {
-    // rpc process(beerRequest) returns (stream OrderStatusResponse);
     rpc process(beerOrderRequest) returns (stream OrderStatusResponse);
 }
 
-// message beerId {
-//     int32 beerId = 1;
-// }
-  
-// message beerRequest {
-//     repeated int32 beerIds = 8;
-// }
 message beerOrder {
     int32 id = 1;
     int32 quantity= 2;
