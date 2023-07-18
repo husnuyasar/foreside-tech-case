@@ -1,5 +1,6 @@
 const grpc = require("@grpc/grpc-js");
-
+const BeerRepository = require('./repository/beer.repository');
+const beerRepository = new BeerRepository();
 const beerList = [
     { id : 1, name: 'Efes', bartender_preparation_time: 5, volume: 500, pour_time: 5},
     { id : 2, name: 'Heineken', bartender_preparation_time: 6, volume: 500, pour_time: 5},
@@ -7,7 +8,8 @@ const beerList = [
 ]
 module.exports.getAll = async({request}, callback) => {
     try {
-        callback(null, {result : beerList })
+        const beers = await beerRepository.getAll();
+        callback(null, {result : beers })
     } catch (error) {
         callback(error);
     }
@@ -15,7 +17,7 @@ module.exports.getAll = async({request}, callback) => {
 
 module.exports.get = async({request}, callback) => {
     try {
-        const beer = beerList.find(b=> b.id == request.beerId);
+        const beer = await beerRepository.get(request.beerId);
         console.log("beer :",beer);
         callback(null, beer);
     } catch (error) {
@@ -25,7 +27,8 @@ module.exports.get = async({request}, callback) => {
 
 module.exports.getFilter = async(call, callback) => {
     try {
-        const beers = beerList.filter(b=> call.request.beerIds.includes(b.id));
+        const filter = call.request.beerIds;
+        const beers = await beerRepository.getAll(filter);
         if(beers.length == 0 || beers.length != call.request.beerIds.length){
             callback({
                 message: 'Beer not found',
