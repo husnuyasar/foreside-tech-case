@@ -4,6 +4,7 @@ const beerClient = require("./clients/beer.client")
 const bartenders = [];
 
 module.exports.generateBartenders = () => {
+    console.log("Bartenders count :", parseInt(process.env.BARTENDER_COUNT))
     const bartenderCount = parseInt(process.env.BARTENDER_COUNT);
     for (let index = 1; index <= bartenderCount; index++) {
         bartenders.push({
@@ -39,8 +40,7 @@ const bartender_process = async(call, beerList)=> {
     let completedBeers = [];
     const totalOrder = beerOrders.reduce((a,b) => {return a.quantity + b.quantity});
     const preparatedBeers = [];
-    while(completedBeers.length<totalOrder) {
-        console.log("Completed beers : ",completedBeers.length)    
+    while(completedBeers.length<totalOrder) { 
         const availableBartenders = bartenders.filter((bartender) => !bartender.isPouring);
 
         if (availableBartenders.length === 0) {
