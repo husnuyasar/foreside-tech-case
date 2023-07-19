@@ -1,7 +1,7 @@
 const path = require("path")
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
-const {process,generateBartenders} = require("./order.controller")
+const {process,generateBartenders, getAll, getLastOrderRecord} = require("./order.controller")
 const PROTO_PATH = path.join(__dirname + "/protos/order.proto");
 
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
@@ -14,7 +14,9 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const orderProto = grpc.loadPackageDefinition(packageDefinition).order;
 const server = new grpc.Server();
 server.addService(orderProto.Order.service, {
-    process: process
+    process: process,
+    getAll : getAll,
+    repeatPreviousOrder : getLastOrderRecord
 })
 server.bindAsync(
     "0.0.0.0:3001",
