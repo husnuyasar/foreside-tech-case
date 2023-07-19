@@ -4,6 +4,8 @@ package order;
 
 service Order {
     rpc process(beerOrderRequest) returns (stream OrderStatusResponse);
+    rpc getAll (Empty) returns (orderList);
+    rpc repeatPreviousOrder (Empty) returns (stream OrderStatusResponse);
 }
 
 message beerOrder {
@@ -24,4 +26,18 @@ enum OrderStatus {
 message OrderStatusResponse {
     OrderStatus status = 1;
     string message = 2;
+    string orderId = 3;
+}
+
+message Empty {}
+
+message orderList {
+    repeated orderResponse result = 1;
+}
+
+message orderResponse {
+    string id = 1;
+    string orderDetail = 2;
+    string startedAt = 3;
+    string finishedAt = 4;
 }
