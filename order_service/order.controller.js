@@ -1,6 +1,6 @@
 require('dotenv').config()
 const beerClient = require("./clients/beer.client")
-
+const orderRepository = require('./repository/order.repository');
 const bartenders = [];
 
 module.exports.generateBartenders = () => {
@@ -34,12 +34,38 @@ module.exports.process = async(call) => {
     }
 }
 
+module.exports.getLastOrderRecord = async(call) => {
+    try {
+        const lastOrder = await orderRepository.getLastOrderRecord();
+        const beerList = JSON.parse(lastOrder.orderDetail);
+        call.request.beerOrders = beerList;
+        await this.process(call);
+    } catch (error) {
+        call.destroy(error)
+    }
+}
+
+module.exports.getAll = async(call,callback) => {
+    try {
+        const orders = await orderRepository.getAll();
+        callback(null, {result : orders })
+    } catch (error) {
+        callback(error);
+    }
+}
+
 const bartender_process = async(call, beerList)=> {
     const beerOrders = call.request.beerOrders;
     call.write({status : 1, message : 'Process started.'});
     let completedBeers = [];
     const totalOrder = beerOrders.reduce((a,b) => {return a.quantity + b.quantity});
     const preparatedBeers = [];
+
+    const newOrder = {
+        orderDetail: JSON.stringify(beerOrders),
+        startedAt: new Date(),
+    }
+
     while(completedBeers.length<totalOrder) { 
         const availableBartenders = bartenders.filter((bartender) => !bartender.isPouring);
 
@@ -79,8 +105,9 @@ const bartender_process = async(call, beerList)=> {
         pourBeer(call, beerToPour, bartender, completedBeers)
    
     }
-        
-    call.write({ status: 3, message: "Order is ready!" });
+    newOrder["finishedAt"] = new Date();  
+    const createdOrder = await orderRepository.createOrder(newOrder);
+    call.write({ status: 3, message: "Order is ready!", orderId: createdOrder.id });
     call.end();
 }
 
