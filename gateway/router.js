@@ -34,6 +34,7 @@ module.exports = (app) => {
   app.post("/order", jsonParser, (req, res)=> {
     const call = orderClient.process({ beerOrders : req.body.beerRequest });
     let error;
+    let orderId;
     call.on('error',(err)=> {
       console.log('Error!');
       error = err;
@@ -41,12 +42,43 @@ module.exports = (app) => {
     call.on('data', (statusUpdate) => {
         console.log('Order status changed:');
         console.log(statusUpdate);
+        if(statusUpdate.orderId)
+          orderId = statusUpdate.orderId;
     });
     call.on('end', () => {
       if(error)
         return res.status(500).send(error)
       console.log('Processing done.');
-      res.send('Order ready.')
+      res.send(`Order ready! Id: ${orderId}`)
+    });
+  })
+
+  app.get("/order", (req, res)=> {
+    orderClient.getAll({}, (err, response) => {
+      if(err) return res.status(400).send(err);
+      return res.send(response.result);
+    })
+  })
+
+  app.get("/order/repeat", (req, res)=> {
+    const call = orderClient.repeatPreviousOrder({});
+    let error;
+    let orderId;
+    call.on('error',(err)=> {
+      console.log('Error!');
+      error = err;
+    })
+    call.on('data', (statusUpdate) => {
+        console.log('Order status changed:');
+        console.log(statusUpdate);
+        if(statusUpdate.orderId)
+          orderId = statusUpdate.orderId;
+    });
+    call.on('end', () => {
+      if(error)
+        return res.status(500).send(error)
+      console.log('Processing done.');
+      res.send(`Order ready! Id: ${orderId}`)
     });
   })
 };
