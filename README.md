@@ -25,6 +25,13 @@ In the `beer_service/` directory, there is a `start.sh` file that needs to be ma
 ```bash
 chmod +x beer_service/start.sh
 ```
+---
+**NOTE**
+
+This script will create a MySQL database in the MySQL image, then migrate the beers table and seed it with 14 beers.
+
+---
+
 
 ## Running the Microservices
 
